@@ -1,3 +1,6 @@
+#Title: Added URLs that didn't get blocked
+#Syntax: Domains
+#Number of Entries: 24
 a-ads.com
 adbox.banner_ads.adsbox
 adcolony.com
