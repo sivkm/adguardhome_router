@@ -23,27 +23,26 @@ jobs:
           sudo apt-get install -y curl
 
       - name: Ensure merge.sh is executable
-        run: |
-          if [ ! -x merge.sh ]; then
-            echo "merge.sh is not executable — fixing..."
-            chmod +x merge.sh
-          else
-            echo "merge.sh is already executable."
-          fi
+        run: chmod +x ./merge.sh
 
       - name: Run merge script
         run: ./merge.sh
 
-      - name: Commit changes if needed
+      - name: Commit and push changes using PAT
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add consolidated_blocklist.txt || true
 
+          # Only commit if changes exist
           if ! git diff --cached --quiet; then
             git commit -m "Nightly blocklist update $(date -u)"
+            # Update origin remote to include PAT for authentication
+            git remote set-url origin https://$GH_PAT@github.com/${{ github.repository }}.git
             git push
           else
-            echo "No update needed."
+            echo "No changes to commit."
           fi
