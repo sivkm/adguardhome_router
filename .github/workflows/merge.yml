@@ -1,0 +1,40 @@
+name: Blocklist Auto-Merge
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"   # nightly at 3 AM UTC
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Prepare environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+
+      - name: Merge blocklists
+        run: bash merge.sh
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add consolidated_blocklist.txt || true
+
+          if ! git diff --cached --quiet; then
+            git commit -m "Nightly blocklist update $(date -u)"
+            git push
+          else
+            echo "No update needed."
+          fi
