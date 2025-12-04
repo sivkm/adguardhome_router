@@ -1,7 +1,5 @@
 name: Blocklist Auto-Merge
 
-run: chmod +x merge.sh
-
 on:
   push:
     branches: [ "main" ]
@@ -24,10 +22,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y curl
 
-      - name: Merge blocklists
-        run: bash merge.sh
+      - name: Ensure merge.sh is executable
+        run: |
+          if [ ! -x merge.sh ]; then
+            echo "merge.sh is not executable — fixing..."
+            chmod +x merge.sh
+          else
+            echo "merge.sh is already executable."
+          fi
 
-      - name: Commit changes
+      - name: Run merge script
+        run: ./merge.sh
+
+      - name: Commit changes if needed
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
