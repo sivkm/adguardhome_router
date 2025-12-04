@@ -1,5 +1,7 @@
 name: Blocklist Auto-Merge
 
+run: chmod +x merge.sh
+
 on:
   push:
     branches: [ "main" ]
