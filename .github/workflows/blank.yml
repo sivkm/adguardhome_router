@@ -1,5 +1,8 @@
 name: Blocklist Auto-Merge
 
+permissions:
+  contents: write   # allow commits
+
 on:
   push:
     branches: [ "main" ]
@@ -7,32 +10,29 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
   schedule:
-    - cron: "0 3 * * *"   # nightly at 3 AM UTC
+    - cron: "0 3 * * *"
 
 jobs:
   merge:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 2. Prepare environment
       - name: Prepare environment
         run: |
           sudo apt-get update
           sudo apt-get install -y curl
 
-      # 3. Ensure merge.sh is executable
       - name: Ensure merge.sh is executable
         run: chmod +x ./merge.sh
 
-      # 4. Run merge script
       - name: Run merge script
         run: ./merge.sh
 
-      # 5. Commit and push changes using GITHUB_TOKEN
       - name: Commit and push changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -42,10 +42,8 @@ jobs:
 
           git add consolidated_blocklist.txt || true
 
-          # Commit only if there are changes
           if ! git diff --cached --quiet; then
             git commit -m "Nightly blocklist update $(date -u)"
-            # Push using HTTPS with the built-in token
             git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
           else
             echo "No changes to commit."
