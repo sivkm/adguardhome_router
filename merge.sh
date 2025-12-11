@@ -27,37 +27,45 @@ echo "[+] Processing lists..."
 
 for FILE in "$TMP"/list_*.txt; do
   while IFS= read -r LINE || [[ -n "$LINE" ]]; do
-    # Strip CRLF and whitespace
     CLEAN=$(echo "$LINE" | tr -d '\r' | sed 's/^[ \t]*//;s/[ \t]*$//')
-
-    # Skip empty lines
     [[ -z "$CLEAN" ]] && continue
-
-    # Skip comments
     [[ "$CLEAN" == \#* ]] && continue
 
-    # Allowlist entry (prefix @@||)
+    # Allowlist entry
     if [[ "$CLEAN" == @@\|\|* ]]; then
       echo "$CLEAN" >> "$ALLOW_TMP"
       continue
     fi
 
-    # OISD raw domain (no prefix) -> convert to ||domain^
+    # OISD raw domains
     if [[ "$FILE" == *"domainswild2"* ]]; then
-      # Only process valid domain lines
       if [[ "$CLEAN" =~ ^[A-Za-z0-9.-]+$ ]]; then
         echo "||$CLEAN^" >> "$BLOCK_TMP"
       fi
       continue
     fi
 
-    # Already AdGuard block style (||domain^)
+    # AdGuard-style block rule
     if [[ "$CLEAN" == \|\|* ]]; then
       echo "$CLEAN" >> "$BLOCK_TMP"
       continue
     fi
 
-    # Raw domain in non-OISD list → convert
+    # Host-file: IPv4
+    if [[ "$CLEAN" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}[[:space:]]+([A-Za-z0-9.-]+)$ ]]; then
+      DOMAIN="${BASH_REMATCH[2]}"
+      echo "||$DOMAIN^" >> "$BLOCK_TMP"
+      continue
+    fi
+
+    # Host-file: IPv6
+    if [[ "$CLEAN" =~ ^([0-9A-Fa-f:]+)[[:space:]]+([A-Za-z0-9.-]+)$ ]]; then
+      DOMAIN="${BASH_REMATCH[2]}"
+      echo "||$DOMAIN^" >> "$BLOCK_TMP"
+      continue
+    fi
+
+    # Raw domain
     if [[ "$CLEAN" =~ ^[A-Za-z0-9.-]+$ ]]; then
       echo "||$CLEAN^" >> "$BLOCK_TMP"
       continue
@@ -65,6 +73,7 @@ for FILE in "$TMP"/list_*.txt; do
 
   done < "$FILE"
 done
+
 
 echo "[+] Sorting and deduping..."
 
