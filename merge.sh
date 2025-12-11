@@ -16,12 +16,11 @@ URLS=(
 # Domains that must NEVER be allowlisted (exact or any subdomain)
 DISALLOWED_ALLOWLIST_DOMAINS=(
   "doubleclick.net"
-  "adwolf.ru"
   "sellpoint.net"
   "ad.10010.com"
   "ads.tdbank.com"
-  "adrelayer.com"
   "adserver.com"
+  "adsterra.com"
 )
 
 # Temporary files
