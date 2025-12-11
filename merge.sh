@@ -6,6 +6,7 @@ TMP=$(mktemp -d)
 
 URLS=(
   "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt"
+  "https://adguardteam.github.io/HostlistsRegistry/assets/filter_2.txt"
   "https://adguardteam.github.io/HostlistsRegistry/assets/filter_51.txt"
   "https://small.oisd.nl/domainswild2"
   "https://raw.githubusercontent.com/sivkm/adguardhome_router/refs/heads/main/blocklist.txt"
